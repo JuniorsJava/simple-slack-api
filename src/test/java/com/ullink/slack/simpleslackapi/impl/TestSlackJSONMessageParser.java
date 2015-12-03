@@ -1,7 +1,10 @@
 package com.ullink.slack.simpleslackapi.impl;
 
-import java.io.IOException;
-import java.util.Map;
+import com.ullink.slack.simpleslackapi.*;
+import com.ullink.slack.simpleslackapi.events.*;
+import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
+import com.ullink.slack.simpleslackapi.replies.SlackChannelReply;
+import com.ullink.slack.simpleslackapi.replies.SlackReply;
 import org.assertj.core.api.Assertions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9,25 +12,9 @@ import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.ullink.slack.simpleslackapi.SlackAttachment;
-import com.ullink.slack.simpleslackapi.SlackChannel;
-import com.ullink.slack.simpleslackapi.SlackMessageHandle;
-import com.ullink.slack.simpleslackapi.SlackPersona;
-import com.ullink.slack.simpleslackapi.SlackSession;
-import com.ullink.slack.simpleslackapi.SlackUser;
-import com.ullink.slack.simpleslackapi.events.ReactionAdded;
-import com.ullink.slack.simpleslackapi.events.ReactionRemoved;
-import com.ullink.slack.simpleslackapi.events.SlackChannelArchived;
-import com.ullink.slack.simpleslackapi.events.SlackChannelCreated;
-import com.ullink.slack.simpleslackapi.events.SlackChannelDeleted;
-import com.ullink.slack.simpleslackapi.events.SlackChannelUnarchived;
-import com.ullink.slack.simpleslackapi.events.SlackEvent;
-import com.ullink.slack.simpleslackapi.events.SlackGroupJoined;
-import com.ullink.slack.simpleslackapi.events.SlackMessageDeleted;
-import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
-import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
-import com.ullink.slack.simpleslackapi.replies.SlackChannelReply;
-import com.ullink.slack.simpleslackapi.replies.SlackReply;
+
+import java.io.IOException;
+import java.util.Map;
 
 public class TestSlackJSONMessageParser {
 
@@ -44,16 +31,17 @@ public class TestSlackJSONMessageParser {
     private static final String TEST_CHANNEL_UNARCHIVED = "{\"type\":\"channel_unarchive\",\"channel\": \"TESTCHANNEL1\",\"user\":\"TESTUSER1\"}";
 
     private static final String NEW_CHANNEL = "\"channel\": { \"id\": \"NEWCHANNEL\", \"name\": \"new channel\", \"creator\": \"TESTUSER1\", \"topic\": {\"value\": \"To have something new\"}, \"purpose\": {\"value\": \"This channel so new it aint even old yet\"}}";
-    private static final String TEST_GROUP_JOINED = "{\"type\":\"group_joined\"," + NEW_CHANNEL + "}";
 
     private static final String TEST_REACTION = " \"reaction\":\"thumbsup\", \"item\": {\"channel\":\"NEWCHANNEL\",\"ts\":\"1360782804.083113\"}";
     private static final String TEST_REACTION_ADDED = "{\"type\":\"reaction_added\", " + TEST_REACTION + "}";
     private static final String TEST_REACTION_REMOVED = "{\"type\":\"reaction_removed\", " + TEST_REACTION + "}";
+    private static final String TEST_GROUP_JOINED       = "{\"type\":\"group_joined\",\"channel\": { \"id\": \"NEWCHANNEL\", \"name\": \"new channel\", \"creator\": \"TESTUSER1\"}}";
+    private static final String CHANNEL_HISTORY         = "{\"ok\": true,\"latest\": \"1358547726.000003\",\"messages\": [{\"type\": \"message\",\"ts\": \"1358546515.000008\",\"user\": \"U2147483896\",\"text\": \"Hello\"},{\"type\": \"message\",\"ts\": \"1358546515.000007\",\"user\": \"U2147483896\",\"text\": \"World\",\"is_starred\": true,},{\n\"type\": \"something_else\",\"ts\": \"1358546515.000007\",\"wibblr\": true}],\"has_more\": false}";
 
     @Before
     public void setup() {
         session = new AbstractSlackSessionImpl() {
-            
+
             @Override
             public void connect() {
                 SlackUser user1 = new SlackUserImpl("TESTUSER1", "test user 1", "", "", false, false, false, false, false, false, false, "tz", "tzLabel", new Integer(0));
@@ -173,6 +161,20 @@ public class TestSlackJSONMessageParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void shouldParseChannelHistory() throws Exception {
+        JSONParser parser = new JSONParser();
+        JSONObject object = (JSONObject) parser.parse(CHANNEL_HISTORY);
+
+        SlackChannelImpl slackChannel = new SlackChannelImpl("id", "name", "topic", "purpose", true);
+        SlackChannelHistory history = SlackJSONMessageParser.decodeChannelHistory(session, slackChannel, object);
+
+        Assertions.assertThat(history.getChannelEvents()).hasSize(3);
+        Assertions.assertThat(history.getChannel()).isEqualTo(slackChannel);
+        Assertions.assertThat(history.getLatest()).isEqualTo("1358547726.000003");
+        Assertions.assertThat(history.hasMore()).isFalse();
     }
 
     @Test
