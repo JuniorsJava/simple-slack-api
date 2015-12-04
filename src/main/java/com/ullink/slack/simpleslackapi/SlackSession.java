@@ -3,6 +3,7 @@ package com.ullink.slack.simpleslackapi;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import com.ullink.slack.simpleslackapi.events.SlackChannelHistory;
 import com.ullink.slack.simpleslackapi.impl.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.listeners.ReactionAddedListener;
 import com.ullink.slack.simpleslackapi.listeners.ReactionRemovedListener;
@@ -58,9 +59,9 @@ public interface SlackSession {
     SlackMessageHandle<SlackMessageReply> sendMessage(SlackChannel channel, String message, SlackAttachment attachment);
 
     SlackMessageHandle<SlackMessageReply> sendMessageToUser(SlackUser user, String message, SlackAttachment attachment);
-    
+
     SlackMessageHandle<SlackMessageReply> sendMessageToUser(String userName, String message, SlackAttachment attachment);
-    
+
     SlackMessageHandle<SlackMessageReply> updateMessage(String timeStamp, SlackChannel channel, String message);
 
     SlackMessageHandle<SlackMessageReply> sendMessageOverWebSocket(SlackChannel channel, String message, SlackAttachment attachment);
@@ -70,9 +71,9 @@ public interface SlackSession {
     SlackMessageHandle<SlackChannelReply> joinChannel(String channelName);
 
     SlackMessageHandle<SlackChannelReply> leaveChannel(SlackChannel channel);
-    
+
     SlackMessageHandle<SlackChannelReply> inviteToChannel(SlackChannel channel, SlackUser user);
-    
+
     SlackMessageHandle<SlackReply> archiveChannel(SlackChannel channel);
 
     SlackMessageHandle<SlackChannelReply> openDirectMessageChannel(SlackUser user);
@@ -138,13 +139,18 @@ public interface SlackSession {
      * @return true if connection is open
      */
     boolean isConnected();
-    
+
     void addReactionAddedListener(ReactionAddedListener listener);
-    
+
     void removeReactionAddedListener(ReactionAddedListener listener);
-    
+
     void addReactionRemovedListener(ReactionRemovedListener listener);
-    
+
     void removeReactionRemovedListener(ReactionRemovedListener listener);
 
+
+    /**
+     * Fetches channel history
+     */
+    SlackChannelHistory fetchChannelHistory(SlackChannel slackChannel);
 }

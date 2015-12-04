@@ -1,33 +1,11 @@
 package com.ullink.slack.simpleslackapi.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.ullink.slack.simpleslackapi.SlackAttachment;
-import com.ullink.slack.simpleslackapi.SlackBot;
-import com.ullink.slack.simpleslackapi.SlackChannel;
-import com.ullink.slack.simpleslackapi.SlackMessageHandle;
-import com.ullink.slack.simpleslackapi.SlackPersona;
-import com.ullink.slack.simpleslackapi.SlackSession;
-import com.ullink.slack.simpleslackapi.SlackTeam;
-import com.ullink.slack.simpleslackapi.SlackUser;
-import com.ullink.slack.simpleslackapi.listeners.ReactionAddedListener;
-import com.ullink.slack.simpleslackapi.listeners.ReactionRemovedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackChannelArchivedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackChannelCreatedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackChannelDeletedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackChannelRenamedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackChannelUnarchivedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackConnectedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackGroupJoinedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackMessageDeletedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
-import com.ullink.slack.simpleslackapi.listeners.SlackMessageUpdatedListener;
+import com.ullink.slack.simpleslackapi.*;
+import com.ullink.slack.simpleslackapi.events.SlackChannelHistory;
+import com.ullink.slack.simpleslackapi.listeners.*;
 import com.ullink.slack.simpleslackapi.replies.SlackMessageReply;
+
+import java.util.*;
 
 abstract class AbstractSlackSessionImpl implements SlackSession
 {
@@ -64,6 +42,11 @@ abstract class AbstractSlackSessionImpl implements SlackSession
     public Collection<SlackUser> getUsers()
     {
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public SlackChannelHistory fetchChannelHistory(SlackChannel slackChannel) {
+        return new SlackChannelHistoryImpl(slackChannel, Collections.EMPTY_LIST, String.valueOf(System.currentTimeMillis()), true);
     }
 
     @Override
@@ -285,7 +268,7 @@ abstract class AbstractSlackSessionImpl implements SlackSession
     public void removeReactionAddedListener(ReactionAddedListener listener) {
         reactionAddedListener.remove(listener);
     }
-    
+
     @Override
     public void addReactionRemovedListener(ReactionRemovedListener listener) {
         reactionRemovedListener.add(listener);
