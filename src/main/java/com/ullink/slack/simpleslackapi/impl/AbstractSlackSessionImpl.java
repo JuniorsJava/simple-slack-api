@@ -45,8 +45,8 @@ abstract class AbstractSlackSessionImpl implements SlackSession
     }
 
     @Override
-    public SlackChannelHistory fetchChannelHistory(SlackChannel slackChannel) {
-        return new SlackChannelHistoryImpl(slackChannel, Collections.EMPTY_LIST, String.valueOf(System.currentTimeMillis()), true);
+    public SlackChannelHistory fetchChannelHistory(SlackChannel slackChannel, String oldest, String latest) {
+        return new SlackChannelHistoryImpl(slackChannel, Collections.EMPTY_LIST, String.valueOf(System.currentTimeMillis()), false);
     }
 
     @Override
